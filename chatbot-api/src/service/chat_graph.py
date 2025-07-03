@@ -42,38 +42,26 @@ Basándote en el historial del chat a continuación, actualiza la información d
 class ChatbotGraph:
     def __init__(self, chat_model: BaseChatModel):
         self.model = chat_model
-        
-        # Store for long-term (across-thread) memory
         self.across_thread_memory = InMemoryStore()
-        
-        # Checkpointer for short-term (within-thread) memory
         self.within_thread_memory = MemorySaver()
-        
-        # Construir y compilar el grafo
         self.graph = self._build_graph()
-        
-        # Diccionario para almacenar los thread_ids por usuario
         self.user_threads = {}
         
     def _build_graph(self):
         
         def call_model(state: MessagesState, config: RunnableConfig, store: BaseStore):
             
-            # Get the user ID from the config
             user_id = config["configurable"]["user_id"]
 
-            # Retrieve memory from the store
             namespace = ("memory", user_id)
             key = "user_memory"
             existing_memory = store.get(namespace, key)
 
-            # Extract the actual memory content if it exists
             if existing_memory:
                 existing_memory_content = existing_memory.value.get('memory')
             else:
                 existing_memory_content = "No existing memory found."
 
-            # Format the memory in the system prompt
             system_msg = MODEL_SYSTEM_MESSAGE.format(memory=existing_memory_content)
             
             response = self.model.invoke([SystemMessage(content=system_msg)] + state["messages"])
@@ -98,7 +86,7 @@ class ChatbotGraph:
             
             return state
 
-        # Define the graph
+        # Construyendo el grafo de estados
         builder = StateGraph(MessagesState)
         builder.add_node("call_model", call_model)
         builder.add_node("write_memory", write_memory)
@@ -106,7 +94,7 @@ class ChatbotGraph:
         builder.add_edge("call_model", "write_memory")
         builder.add_edge("write_memory", END)
 
-        # Compile the graph with the checkpointer and store
+        # Compilar
         return builder.compile(
             checkpointer=self.within_thread_memory, 
             store=self.across_thread_memory
