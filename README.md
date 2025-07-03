@@ -1,1 +1,1 @@
-# demo
+# chatbot-demo
