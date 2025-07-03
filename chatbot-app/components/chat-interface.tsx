@@ -2,7 +2,6 @@
 
 import type React from "react"
 
-import { type Message } from "ai/react"
 import { useState, useRef, useEffect, FormEvent } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -15,8 +14,7 @@ import {
   Dialog,
   DialogContent,
   DialogHeader,
-  DialogTitle,
-  DialogDescription
+  DialogTitle
 } from "@/components/ui/dialog"
 
 // Estilos para el contenedor de markdown
@@ -84,13 +82,6 @@ export default function ChatInterface({ user, onLogout }: ChatInterfaceProps) {
   const handleOpenMemory = () => {
     setIsMemoryOpen(true)
     fetchUserMemory()
-  }
-
-  const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    if (input.trim()) {
-      handleSubmit(e)
-    }
   }
 
   return (
